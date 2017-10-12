@@ -133,6 +133,8 @@ burnIn = 5000
 acceptance = 1-mean(duplicated(chain[-(1:burnIn),]))
 
 ### Summary: #######################
+Summary<- function(chain, burnIn, trueA, trueB, trueSd)
+{
 # generate 2x3 array of graphs
 par(mfrow = c(2,3))
 # draw histogram with the 1st row of the chain matrix and the number of bis is 30
@@ -172,6 +174,11 @@ abline(h = trueB, col="red" )
 plot(chain[-(1:burnIn),3], type = "l", xlab="True value = red line" , main = "Chain values of sd", )
 # draw a red horizontal line at the trueSd
 abline(h = trueSd, col="red" )
+}
+graphics.off() 
+par(mar=c(1,1,1,1))
+Summary(chain, burnIn, trueA, trueB, trueSd)
+
 
 # for comparison:
 # get summary of the linear regression model with dependent variable as y 
