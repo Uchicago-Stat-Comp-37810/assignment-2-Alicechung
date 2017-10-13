@@ -1,4 +1,4 @@
-#likelihood function
+# likelihood function
 likelihood <- function(param){
   a = param[1]
   b = param[2]
@@ -13,7 +13,7 @@ likelihood <- function(param){
 # slopevalues function
 slopevalues <- function(x){return(likelihood(c(x, trueB, trueSd)))}
 
-# Prior distribution function
+# prior distribution function
 prior <- function(param){
   a = param[1]
   b = param[2]
@@ -24,26 +24,27 @@ prior <- function(param){
   return(aprior+bprior+sdprior)
 }
 
-# posteriot function
+# posterior function
 posterior <- function(param){
   return (likelihood(param) + prior(param))
 }
 
-# proporsal function
+# proposal function
 proposalfunction <- function(param){
   return(rnorm(3,mean = param, sd= c(0.1,0.5,0.3)))
 }
 
-# run_metropolis_MCMC function
+# MH-MCMC function
+
 run_metropolis_MCMC <- function(startvalue, iterations){
   chain = array(dim = c(iterations+1,3))
   chain[1,] = startvalue
   for (i in 1:iterations){
     proposal = proposalfunction(chain[i,])
-    probab = exp(posterior(proposal) - posterior(chain[i,]))
     
+    probab = exp(posterior(proposal) - posterior(chain[i,]))
     if (runif(1) < probab){
-      chain[i+1,] = proposalmatrix
+      chain[i+1,] = proposal
     }else{
       chain[i+1,] = chain[i,]
     }
@@ -51,11 +52,11 @@ run_metropolis_MCMC <- function(startvalue, iterations){
   return(chain)
 }
 
-# summary function
-Summary<- function(chain, burnIn, trueA, trueB, trueSd)
-{
+
+# Summary function
+Summary <- function(chain, burnIn, trueA, trueB, trueSd) {
   par(mfrow = c(2,3))
-  hist(chain[-(1:burnIn),1],nclass=30, , main="Posterior of a", xlab="True value = red line" )
+  hist(chain[-(1:burnIn),1],nclass=30, main="Posterior of a", xlab="True value = red line" )
   abline(v = mean(chain[-(1:burnIn),1]))
   abline(v = trueA, col="red" )
   hist(chain[-(1:burnIn),2],nclass=30, main="Posterior of b", xlab="True value = red line")
@@ -64,13 +65,30 @@ Summary<- function(chain, burnIn, trueA, trueB, trueSd)
   hist(chain[-(1:burnIn),3],nclass=30, main="Posterior of sd", xlab="True value = red line")
   abline(v = mean(chain[-(1:burnIn),3]) )
   abline(v = trueSd, col="red" )
-  plot(chain[-(1:burnIn),1], type = "l", xlab="True value = red line" , main = "Chain values of a", )
+  plot(chain[-(1:burnIn),1], type = "l", xlab="True value = red line" , main = "Chain values of a")
   abline(h = trueA, col="red" )
-  plot(chain[-(1:burnIn),2], type = "l", xlab="True value = red line" , main = "Chain values of b", )
+  plot(chain[-(1:burnIn),2], type = "l", xlab="True value = red line" , main = "Chain values of b")
   abline(h = trueB, col="red" )
-  plot(chain[-(1:burnIn),3], type = "l", xlab="True value = red line" , main = "Chain values of sd", )
+  plot(chain[-(1:burnIn),3], type = "l", xlab="True value = red line" , main = "Chain values of sd")
   abline(h = trueSd, col="red" )
 }
 
-
-
+# compare outcomes function
+# define function for comparing 10 iterations of run_metropolis_MCMC function 
+compare_outcomes <- function(iterations) {
+  # set a initial matrix 
+  initialmatrix <- array(dim = c(2,10))
+  burnIn = iterations * 0.5
+  for (i in 1:10) {
+    # set a andomly selected start values for a, b and sd
+    startvalues <- c(runif(1, 0, 10), rnorm(1, 0, 5), runif(1, 0, 30))
+    # run run_metropolis_MCMC with startvalues and iterations 
+    chain <- run_metropolis_MCMC(startvalues, iterations)
+    # compute the mean of the values into the initialmatrix[1,i]
+    initialmatrix[1,i] <- mean(chain[-(1:burnIn),][,1])
+    # compute the standard deviation of the values into the initialmatrix[2,i]
+    initialmatrix[2,i] <- sd(chain[-(1:burnIn),][,1])
+  }
+  # return the intialmatrix
+  return(initialmatrix)
+}

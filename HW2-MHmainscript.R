@@ -14,6 +14,7 @@ y <-  trueA * x + trueB + rnorm(n=sampleSize,mean=0,sd=trueSd)
 plot(x,y, main="Test Data")
 
 # Example: plot the likelihood profile of the slope a
+
 slopelikelihoods <- lapply(seq(3, 7, by=.05), slopevalues)
 plot (seq(3, 7, by=.05), slopelikelihoods , type="l", xlab = "values of slope parameter a", ylab = "Log likelihood")
 
@@ -27,3 +28,5 @@ acceptance = 1-mean(duplicated(chain[-(1:burnIn),]))
 Summary(chain, burnIn,trueA,trueB,trueSd)
 # for comparison:
 summary(lm(y~x))
+
+compare_outcomes(1000)
