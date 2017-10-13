@@ -1,0 +1,103 @@
+---
+title: "HW2 Report "
+author: "Alice Mee Seon Chung"
+date: "10/9/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("~/Desktop/2017 FALL/STAT37810/assignment-2-Alicechung/")
+source("HW2-allfunctions.R")
+```
+## Part 1.6 Compare_outcome
+
+We make a new function called `compare_outcomes`, that takes as input an iteration number and compute the mean and std of the values in the chain for a and return those output in matrix. We can test this function for 1,000, 10,000, and 100,000 iterations as different input values. Here, we set our true value A as 5.
+```{r init}
+trueA <- 5
+trueB <- 0
+trueSd <- 10
+sampleSize <- 31
+
+# create independent x-values 
+x <- (-(sampleSize-1)/2):((sampleSize-1)/2)
+# create dependent values according to ax + b + N(0,sd)
+y <-  trueA * x + trueB + rnorm(n=sampleSize,mean=0,sd=trueSd)
+```
+
+```{r compare}
+# compare outcomes function
+# define function for comparing 10 iterations of run_metropolis_MCMC function 
+compare_outcomes <- function(iterations) {
+  # set a initial matrix 
+  initialmatrix <- array(dim = c(2,10))
+  burnIn = iterations * 0.5
+  for (i in 1:10) {
+    # set a andomly selected start values for a, b and sd
+    startvalues = c(runif(1, 0, 10), rnorm(1, 0, 5), runif(1, 0, 30))
+    # run run_metropolis_MCMC with startvalues and iterations 
+    chain = run_metropolis_MCMC(startvalues, iterations)
+    # compute the mean of the values into the initialmatrix[1,i]
+    initialmatrix[1,i] <- mean(chain[-(1:burnIn),][,1])
+    # compute the standard deviation of the values into the initialmatrix[2,i]
+    initialmatrix[2,i] <- sd(chain[-(1:burnIn),][,1])
+  }
+  # return the intialmatrix
+  return(initialmatrix)
+}
+```
+
+Here are the results of different numbers of iterations.
+First iteration number is 1,000 and the matrix with mean and sd are below,
+```{r 1}
+results1 <-compare_outcomes(1000)
+print(results1)
+```
+
+Second iteration number is 10,000 and the matrix with mean and sd are below,
+```{r 2}
+results2 <-compare_outcomes(10000)
+print(results2)
+```
+
+Third iteration number is 100,000 and the matrix with mean and sd are below,
+```{r 3}
+results3 <-compare_outcomes(100000)
+print(results3)
+```
+
+
+```{r plot, echo=FALSE}
+plot(results1[1,], type = 'l', main = "Mean of a", ylab="E[a|X]")
+lines(results2[1,], col = "blue")
+lines(results3[1,], col = "red")
+legend("topright",legend=c("1000 iterations","10000 iterations","100000 iterations"),
+lty=1,lwd=2,pch=21,col=c("black","blue","red"),
+bty="n",cex=0.8, text.col=c("black","blue","red"), inset=0.01)
+```
+```{r mean2, include=FALSE}
+# get mean of means
+mean1 <- mean(results1[1,])
+mean2 <- mean(results2[1,])
+mean3 <- mean(results2[1,])
+```
+For easier comparison of above results, let's plot with three lines of means of "a". As you saw from above graph, we can observe that as iteration number increases the trend of the mean of a is less fluctuates and becomes stable. We also can see when the iteration number is 1,000, the mean of mean of "a" is `r mean1` and when the iteration number is 10,000, the mean of mean of "a" is `r mean2`. Lastly, when the iteration number is 100,000, the mean of mean of "a" is `r mean2`. Thus as iteration number increases, the mean of mea of "a"" also becomes small and stable. 
+
+```{r plot2, echo=FALSE}
+plot(results1[2,], type = 'l', main = "Standard deviation of a", ylab="SD[a|X]")
+lines(results2[2,], col = "blue")
+lines(results3[2,], col = "red")
+legend("topright",legend=c("1000 iterations","10000 iterations","100000 iterations"),
+lty=1,lwd=2,pch=21,col=c("black","blue","red"),
+bty="n",cex=0.8, text.col=c("black","blue","red"), inset=0.01)
+```
+```{r results, include=FALSE}
+# get mean of sds
+sdmean1 <- mean(results1[2,])
+sdmean2 <- mean(results2[2,])
+sdmean3 <- mean(results2[2,])
+```
+
+Again let's plot with three lines of standard deviation of "a". As you saw from above graph, we can observe that as iteration number increases the trend of the standard deviation of "a"" is less fluctuates and becomes stable like previous observation. When the iteration number is 1,000, the mean of standard deviation of "a" is `r sdmean1` and when the iteration number is 10,000, the mean of standard deviation of "a" is `r sdmean2`. Lastly, when the iteration number is 100,000, the mean of standard deviation of "a" is `r sdmean2`. Thus as iteration number increases, the mean of mea of "a"" also becomes small and stable. 
+
+To sum up, the deviation of the results decreases and becomes stable, we can conclude that the accuracy of algorithm in finding "a" improves as the number of iterations increases. 
