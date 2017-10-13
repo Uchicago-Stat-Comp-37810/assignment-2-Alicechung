@@ -72,9 +72,9 @@ x = 3.14
 y = 100
 print()
 print('6.')
-print(i % j)
-print(y // j)
-print(x * y)
+print("i % j is",i % j)
+print("y // j is",y // j)
+print("x * y is",x * y)
 
 
 
